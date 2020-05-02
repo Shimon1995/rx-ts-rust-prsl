@@ -1,6 +1,6 @@
 import { animationFrameScheduler, fromEvent, range } from 'rxjs';
-import { mergeMap, map } from 'rxjs/operators';
-import { add } from './add.rs';
+import { mergeMap, map, takeUntil } from 'rxjs/operators';
+// import { add } from './add.rs';
 
 const someDiv = document.querySelector('div');
 
@@ -14,6 +14,7 @@ function direct({
 	direction: string;
 	offset: number;
 }): void {
+	offset /= 100;
 	switch (direction) {
 		case 'ArrowLeft':
 			globalOffsetX -= offset;
@@ -32,13 +33,13 @@ function direct({
 
 fromEvent(document.body, 'keydown')
 	.pipe(
-		// throttleTime(2),
 		mergeMap((kEvent: KeyboardEvent) =>
-			range(1, 10, animationFrameScheduler).pipe(
+			range(1, Infinity, animationFrameScheduler).pipe(
 				map((iter) => ({ offset: iter, direction: kEvent.key })),
+				takeUntil(fromEvent(document.body, 'keyup')),
 			),
 		),
 	)
 	.subscribe(direct);
 
-alert(add(2, 3));
+// alert(add(2, 3));
